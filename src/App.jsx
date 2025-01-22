@@ -8,13 +8,13 @@ const initialFriends = [
     id: 118836,
     name: "Budi",
     image: "https://i.pravatar.cc/48?u=118836",
-    balance: -7,
+    balance: 0,
   },
   {
     id: 933372,
     name: "Sukma",
     image: "https://i.pravatar.cc/48?u=933372",
-    balance: 20,
+    balance: 0,
   },
   {
     id: 499476,
@@ -25,14 +25,60 @@ const initialFriends = [
 ];
 
 export default function App() {
+  const [friends, setFriends] = useState(initialFriends);
+  const [showAddFriend, setShowAddFriend] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+
+  function handleShowAddFriend() {
+    setShowAddFriend((showAddFriend) => !showAddFriend);
+    setSelectedFriend(null);
+  }
+
+  function handleAddFriend(friend) {
+    setFriends((friends) => [...friends, friend]);
+  }
+
+  function handleSelectedFriend(friend) {
+    setSelectedFriend((selected) =>
+      selected?.id === friend.id ? null : friend
+    );
+    setShowAddFriend(false);
+  }
+
+  function handleSplitBill(value) {
+    setFriends(
+      friends.map((friend) => {
+        if (friend.id === selectedFriend?.id) {
+          return {
+            ...friend,
+            balance: friend.balance + value,
+          }
+        }
+        return friend;
+      })
+    )
+    setSelectedFriend(null);
+  }
+
   return (
     <div className="app">
       <div className="sidebar">
-        <FriendList friends={initialFriends}/>
-        <FormAddFriend />
-        <button className="button">Tambah Teman</button>
+        <FriendList
+          friends={friends}
+          onSelected={handleSelectedFriend}
+          selectedFriend={selectedFriend}
+        />
+        {showAddFriend && <FormAddFriend onAddFriend={handleAddFriend} />}
+        <button className="button" onClick={handleShowAddFriend}>
+          {showAddFriend ? "Tutup" : "Tambah Teman"}
+        </button>
       </div>
-        <FormSplitBill />
+      {selectedFriend && (
+        <FormSplitBill
+          selectedFriend={selectedFriend}
+          onSplitBill={handleSplitBill}
+        />
+      )}
     </div>
-  )
+  );
 }
